@@ -1,5 +1,5 @@
 # MicroProcessor
-h2>스피드 미로 탈출 게임</h2>
+<h2>스피드 미로 탈출 게임</h2>
     <h3>MicroProcessor Project.</h3>
     <h4><b>tm4c123gh6pm</b> 이용, 115200 통신속도.</h4>
     <ol>
