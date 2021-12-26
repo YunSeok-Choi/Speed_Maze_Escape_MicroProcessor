@@ -24,7 +24,7 @@ volatile char level[2];
 volatile int row = 1, col = 0;
 volatile int chr = 0;
 
-char map[12][12] = { { '1','1','1','1','1','1','1','1','1','1','1','1' },
+char map[12][12] = { { '1','1','1','1','1','1','1','1','1','1','1','1' },                     //맵
                       { 'x','0','1','1','1','1','1','1','1','1','0','1' },
                       { '1','0','1','1','0','0','0','1','1','1','0','1' },
                       { '1','0','0','0','0','1','0','1','1','0','0','1' },
@@ -53,7 +53,7 @@ void Delay(uint32_t ui32Seconds){   // 딜레이 함수
 }
 
 
-void UART0IntHandler(void)      // UART 핸들러
+void UART0IntHandler(void)      // UART 인터럽트 핸들러
 {
     unsigned long ulStatus;
     int i;
@@ -83,7 +83,7 @@ void UART0IntHandler(void)      // UART 핸들러
     }
 }
 
-void Timer0IntHandler(void)             //TIMER 핸들러
+void Timer0IntHandler(void)             //TIMER 인터럽트 핸들러
 {
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
     time--;
@@ -97,7 +97,7 @@ void Timer0IntHandler(void)             //TIMER 핸들러
    IntMasterEnable();
 }
 
-void ADC0IntHandler(){                  // ADC 핸들러
+void ADC0IntHandler(){                  // ADC  핸들러
 
     ADCSequenceDataGet(ADC0_BASE,0,ADC);
     ADCSequenceDataGet(ADC0_BASE,1,ADC);
@@ -131,7 +131,7 @@ void print_Map(char maze[][MAPSIZE]){           // 맵 출력
                 UARTprintf("#");
             else if (maze[i][j] == 'x'){
                 UARTprintf("M");
-                if(j >= 0 && j <= 3){                      // 주인공이 도착지점에 가까워 질 수록 값 증가
+                if(j >= 0 && j <= 3){                      // 주인공이 도착지점에 가까워 질수록 값 증가. LED의 밝기가 세짐
                     PWMOutputState(PWM0_BASE, PWM_OUT_0_BIT, false);
                     PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE,PWM_GEN_0)*1/50);
                     PWMOutputState(PWM0_BASE, PWM_OUT_0_BIT, true);
@@ -158,18 +158,18 @@ void print_Map(char maze[][MAPSIZE]){           // 맵 출력
 }
 void ConfigureUART(void)                        //UART 설정
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UART0));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);                //UART_0 사용
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UART0));         
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);                //GPIO_A 사용
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));         
 
 
-    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);      //UART를 GPIO_A 0번과 1번PIN에 연결
+    GPIOPinConfigure(GPIO_PA0_U0RX);                                //송수신연결
     GPIOPinConfigure(GPIO_PA1_U0TX);
 
-    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200, (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+    UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), 115200, (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE)); //UART포트의 베이스 주소, 공급되는 클록 등
 
     UARTClockSourceSet(UART0_BASE, UART_CLOCK_PIOSC);
 
@@ -178,36 +178,36 @@ void ConfigureUART(void)                        //UART 설정
 
 void ConfigureTIME(void){                       //TIMER 설정
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);                //GPIO_F 사용
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF));
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);               //TIMER_0 사용
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_TIMER0));
 
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3 | GPIO_PIN_2 | GPIO_PIN_1);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_3 | GPIO_PIN_2 | GPIO_PIN_1); //Port F의 1,2,3,번 핀을 출력으로 설정
 
-    TimerConfigure(TIMER0_BASE, TIMER_CFG_A_PERIODIC);
+    TimerConfigure(TIMER0_BASE, TIMER_CFG_A_PERIODIC);            //타이머가 한주기가 끝나도 반복
 
-    TimerLoadSet(TIMER0_BASE, TIMER_A, SysCtlClockGet());
+    TimerLoadSet(TIMER0_BASE, TIMER_A, SysCtlClockGet());         //클록에 맞춰 주기 설정
 }
 
 void ConfigurePWM(void){                        //PWM 설정
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_PWM0);                 //PWM_0 사용
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_PWM0));
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);                //GPIO_B 사용
     while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOB));
 
-    GPIOPinConfigure(GPIO_PB6_M0PWM0);
+    GPIOPinConfigure(GPIO_PB6_M0PWM0);                           //PB6의 M0 사용
 
-    GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_6);
+    GPIOPinTypePWM(GPIO_PORTB_BASE, GPIO_PIN_6);                 //Port B의 6번 Pin으로 설정
 
     PWMGenConfigure(PWM0_BASE, PWM_GEN_0, PWM_GEN_MODE_DOWN | PWM_GEN_MODE_NO_SYNC);
 
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, (SysCtlClockGet()/4/250));
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, (SysCtlClockGet()/4/250));              //주기 설정
 
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE,PWM_GEN_0)*1/50);
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, PWMGenPeriodGet(PWM0_BASE,PWM_GEN_0)*1/50);  //Load값 설정
 
     PWMOutputState(PWM0_BASE, PWM_OUT_0_BIT, false);
 
@@ -215,17 +215,17 @@ void ConfigurePWM(void){                        //PWM 설정
 
 void ConfigureADC(void){                        //ADC 설정
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);                    //ADC_0 사용
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);                   //GPIO_E 사용
 
-    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2 | GPIO_PIN_3);
+    GPIOPinTypeADC(GPIO_PORTE_BASE, GPIO_PIN_2 | GPIO_PIN_3);       //ADC를 PORT_E의 PIN 2, 3번 사용
 
-    ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PIOSC | ADC_CLOCK_RATE_FULL, 0);
+    ADCClockConfigSet(ADC0_BASE, ADC_CLOCK_SRC_PIOSC | ADC_CLOCK_RATE_FULL, 0);   //클록설정
 
-    ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_ALWAYS , 0);
+    ADCSequenceConfigure(ADC0_BASE, 0, ADC_TRIGGER_ALWAYS , 0);     //트리거 발생시켜 샘플링
 
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_CH1 | ADC_CTL_IE);
-    ADCSequenceStepConfigure(ADC0_BASE, 0, 1, ADC_CTL_CH0 | ADC_CTL_IE | ADC_CTL_END);
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 0, ADC_CTL_CH1 | ADC_CTL_IE);                //데이터 변환완료시
+    ADCSequenceStepConfigure(ADC0_BASE, 0, 1, ADC_CTL_CH0 | ADC_CTL_IE | ADC_CTL_END);  //인터럽트 발생
 
     ADCSequenceEnable(ADC0_BASE, 0);
 
@@ -328,7 +328,7 @@ int main(void){
     SysTickPeriodSet(SysCtlClockGet()/100);
     SysCtlPWMClockSet(SYSCTL_PWMDIV_1);
 
-    ConfigureUART();
+    ConfigureUART();                      //설정
     ConfigureTIME();
     ConfigureADC();
     ConfigurePWM();
