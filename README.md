@@ -16,6 +16,6 @@
     클록을 주어 TIMER 인터럽트를 발생. 주기는 1초로 설정<br />
     PWM은 Port B로 설정 후 LED가 출력되는 PORT F와 연결해 LED강도 조절
 </h5>
-![image](https://user-images.githubusercontent.com/66102708/147399953-e09ec88c-38b2-45b6-895c-8e8b4e784c34.png)
 
+![image](https://user-images.githubusercontent.com/66102708/147399953-e09ec88c-38b2-45b6-895c-8e8b4e784c34.png)
 
